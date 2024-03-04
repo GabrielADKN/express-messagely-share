@@ -1,5 +1,5 @@
 /** Express app for message.ly. */
-
+require('dotenv').config();
 
 const express = require("express");
 const cors = require("cors");

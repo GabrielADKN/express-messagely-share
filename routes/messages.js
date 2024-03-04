@@ -1,3 +1,13 @@
+const express = require("express");
+const router = new express.Router();
+const User = require("../models/user");
+const Message = require("../models/message");
+const jwt = require("jsonwebtoken");
+const { SECRET_KEY } = require("../config");
+const ExpressError = require("../expressError");
+const bcrypt = require("bcryptjs");
+const { ensureCorrectUser, ensureLoggedIn, authenticateJWT } = require("../middleware/auth");
+
 /** GET /:id - get detail of message.
  *
  * => {message: {id,
@@ -10,7 +20,17 @@
  * Make sure that the currently-logged-in users is either the to or from user.
  *
  **/
-
+router.get("/:id", ensureCorrectUser, async function (req, res, next) {
+    try {
+        const result = await Message.get(req.params.id);
+        if (!result) {
+            throw new ExpressError("No such message", 404);
+        }
+        return res.json({ message: result });
+    } catch (err) {
+        return next(err);
+    }
+});
 
 /** POST / - post message.
  *
@@ -19,6 +39,17 @@
  *
  **/
 
+router.post("/", ensureCorrectUser, async function (req, res, next) {
+    try {
+        const result = await Message.create(req.body);
+        if (!result) {
+            throw new ExpressError("No such user", 404);
+        }
+        return res.json({ message: result });
+    } catch (err) {
+        return next(err);
+    }
+});
 
 /** POST/:id/read - mark message as read:
  *
@@ -28,3 +59,16 @@
  *
  **/
 
+router.post("/:id/read", ensureCorrectUser, async function (req, res, next) {
+    try {
+        const result = await Message.markRead(req.params.id);
+        if (!result) {
+            throw new ExpressError("No such message", 404);
+        }
+        return res.json({ message: result });
+    } catch (err) {
+        return next(err);
+    }
+});
+
+module.exports = router;

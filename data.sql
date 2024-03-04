@@ -1,21 +1,25 @@
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS messages;
+-- Start by dropping existing tables if they exist to avoid conflicts
+\c messagely_test
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
+-- Create the 'users' table
 CREATE TABLE users (
-    username text PRIMARY KEY,
-    password text NOT NULL,
-    first_name text NOT NULL,
-    last_name text NOT NULL,
-    phone text NOT NULL,
-    join_at timestamp without time zone NOT NULL,
-    last_login_at timestamp with time zone
+    username VARCHAR(255) PRIMARY KEY,
+    password TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    join_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    last_login_at TIMESTAMP WITH TIME ZONE
 );
 
+-- Create the 'messages' table
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
-    from_username text NOT NULL REFERENCES users,
-    to_username text NOT NULL REFERENCES users,
-    body text NOT NULL,
-    sent_at timestamp with time zone NOT NULL,
-    read_at timestamp with time zone
+    from_username VARCHAR(255) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+    to_username VARCHAR(255) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+    body TEXT NOT NULL,
+    sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    read_at TIMESTAMP WITH TIME ZONE
 );
